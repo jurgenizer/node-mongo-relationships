@@ -14,23 +14,20 @@ const Author = mongoose.model('Author', authorSchema);
 
 const Course = mongoose.model('Course', new mongoose.Schema({
   name: String,
-  author: {
-    type: authorSchema,
-    required: true
-  }
+  authors: [authorSchema]
 }));
 
-async function createCourse(name, author) {
+async function createCourse(name, authors) {
   const course = new Course({
-    name, 
-    author
-  }); 
-  
+    name,
+    authors
+  });
+
   const result = await course.save();
   console.log(result);
 }
 
-async function listCourses() { 
+async function listCourses() {
   const courses = await Course.find();
   console.log(courses);
 }
@@ -45,7 +42,7 @@ async function updateAuthor(courseId) {
 
 /* Version 2 */
 async function updateAuthor(courseId) {
-  const course = await Course.updateOne({ _id: courseId}, {
+  const course = await Course.updateOne({ _id: courseId }, {
     $set: {
       'author.name': 'Roberto Marley'
     }
@@ -56,7 +53,21 @@ async function updateAuthor(courseId) {
   });
 }
 
-//createCourse('Node Course', new Author({ name: 'Mosh' }));
+//updateAuthor('67122ac471e653e4af8c5661');
 
-updateAuthor('67122ac471e653e4af8c5661');
+async function addAuthor(courseId, author){
+  const course = await Course.findById(courseId);
+  course.authors.push(author);
+  course.save();
+}
 
+async function removeAuthor(courseId, authorId){
+  const course = await Course.findById(courseId);
+  const author = course.authors.id(authorId);
+  author.deleteOne();
+  course.save();
+}
+
+//addAuthor('6712758024e58b91015c6648', new Author({ name: 'Amy'}));
+
+removeAuthor('6712758024e58b91015c6648', '67127774405a10c17352f45c');
